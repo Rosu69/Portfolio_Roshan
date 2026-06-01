@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Roshan Tamang</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#080b0f;
+  --s1:#0d1117;
+  --s2:#161b22;
+  --s3:#21262d;
+  --bd:#30363d;
+  --acc:#5865f2;
+  --acc2:#57f287;
+  --acc3:#fee75c;
+  --acc4:#ff7eb3;
+  --txt:#e6edf3;
+  --muted:#8b949e;
+  --dim:#484f58;
+  --font-display:'Bebas Neue',sans-serif;
+  --font-body:'Instrument Sans',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth;cursor:none;}
+body{background:var(--bg);color:var(--txt);font-family:var(--font-body);font-size:15px;line-height:1.6;overflow-x:hidden;}
+
+#cursor{position:fixed;pointer-events:none;z-index:9999;mix-blend-mode:difference;}
+#cursor-dot{width:8px;height:8px;background:#fff;border-radius:50%;position:absolute;transform:translate(-50%,-50%);transition:transform .1s;}
+#cursor-ring{width:40px;height:40px;border:1.5px solid rgba(255,255,255,.5);border-radius:50%;position:absolute;transform:translate(-50%,-50%);transition:width .2s,height .2s,border-color .2s;top:0;left:0;}
+body.hovering #cursor-dot{transform:translate(-50%,-50%) scale(2.5);}
+body.hovering #cursor-ring{width:60px;height:60px;border-color:var(--acc);}
+
+#noise{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px 200px;}
+
+/* OTTER CANVAS */
+#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;
+  background:rgba(8,11,15,.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(48,54,61,.5);}
+.nav-logo{font-family:var(--font-display);font-size:22px;letter-spacing:.05em;color:var(--txt);}
+.nav-logo span{color:var(--acc);}
+.nav-links{display:flex;gap:4px;}
+.nav-link{font-size:13px;font-weight:500;color:var(--muted);padding:6px 14px;border-radius:6px;text-decoration:none;
+  transition:color .15s,background .15s;cursor:none;letter-spacing:.02em;}
+.nav-link:hover{color:var(--txt);background:rgba(255,255,255,.06);}
+.nav-cta{background:linear-gradient(135deg,var(--acc),#7c3aed);color:#fff;padding:7px 18px;border-radius:6px;font-size:13px;font-weight:600;
+  text-decoration:none;cursor:none;transition:opacity .15s,transform .1s;letter-spacing:.02em;}
+.nav-cta:hover{transform:translateY(-1px);opacity:.9;}
+
+.page{position:relative;z-index:10;}
+
+#hero{min-height:100vh;display:flex;align-items:center;padding:0 80px;padding-top:56px;position:relative;overflow:hidden;}
+.hero-inner{max-width:900px;}
+.hero-eyebrow{font-family:var(--font-mono);font-size:12px;color:var(--acc2);letter-spacing:.15em;text-transform:uppercase;margin-bottom:20px;
+  display:flex;align-items:center;gap:10px;}
+.hero-eyebrow::before{content:'';width:32px;height:1px;background:var(--acc2);}
+.hero-name{font-family:var(--font-display);font-size:clamp(72px,12vw,160px);line-height:.9;letter-spacing:-.01em;color:var(--txt);margin-bottom:16px;}
+.hero-name .acc{color:var(--acc);}
+.hero-name .scramble{display:inline-block;}
+.hero-sub{font-size:clamp(15px,1.8vw,18px);color:var(--muted);max-width:520px;margin-bottom:20px;font-weight:400;line-height:1.6;}
+.hero-sub strong{color:var(--txt);font-weight:600;}
+.hero-location{font-family:var(--font-mono);font-size:12px;color:var(--dim);margin-bottom:36px;letter-spacing:.08em;}
+.hero-location span{color:var(--acc2);}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:40px;}
+
+/* SOCIAL ICONS ROW */
+.social-row{display:flex;gap:12px;align-items:center;}
+.social-btn{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:10px;
+  text-decoration:none;cursor:none;font-size:20px;transition:transform .2s,box-shadow .2s;border:1px solid var(--bd);
+  background:var(--s2);}
+.social-btn:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,.4);}
+.social-btn.gh:hover{border-color:rgba(255,255,255,.3);background:var(--s3);}
+.social-btn.li:hover{border-color:rgba(10,102,194,.5);background:rgba(10,102,194,.1);}
+.social-btn.ig:hover{border-color:rgba(228,64,95,.5);background:rgba(228,64,95,.1);}
+
+/* SVG SOCIAL ICONS */
+.social-btn svg{width:22px;height:22px;fill:var(--muted);transition:fill .15s;}
+.social-btn.gh:hover svg{fill:#e6edf3;}
+.social-btn.li:hover svg{fill:#60a5fa;}
+.social-btn.ig:hover svg{fill:#f472b6;}
+
+/* FLOAT BADGES */
+.float-badge{position:absolute;display:flex;align-items:center;gap:8px;padding:10px 16px;
+  border-radius:12px;font-size:12px;font-weight:600;letter-spacing:.03em;
+  backdrop-filter:blur(12px);border:1px solid;cursor:default;pointer-events:none;z-index:2;
+  animation:floatBadge 6s ease-in-out infinite;}
+.float-badge.b1{top:18%;right:8%;background:rgba(88,101,242,.12);border-color:rgba(88,101,242,.3);color:#a5b4fc;animation-delay:0s;}
+.float-badge.b2{top:34%;right:3%;background:rgba(87,242,135,.08);border-color:rgba(87,242,135,.25);color:var(--acc2);animation-delay:1.2s;}
+.float-badge.b3{top:55%;right:10%;background:rgba(254,231,92,.07);border-color:rgba(254,231,92,.2);color:var(--acc3);animation-delay:2.4s;}
+.float-badge.b4{top:70%;right:2%;background:rgba(255,126,179,.08);border-color:rgba(255,126,179,.25);color:var(--acc4);animation-delay:0.6s;}
+@keyframes floatBadge{0%,100%{transform:translateY(0px) rotate(-1deg);}33%{transform:translateY(-10px) rotate(1deg);}66%{transform:translateY(-5px) rotate(0deg);}}
+
+.mag-btn{position:relative;display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--font-body);font-size:14px;font-weight:600;cursor:none;
+  padding:14px 28px;border-radius:8px;text-decoration:none;overflow:hidden;letter-spacing:.02em;}
+.mag-btn-primary{background:linear-gradient(135deg,var(--acc),#7c3aed);color:#fff;border:none;}
+.mag-btn-ghost{background:transparent;color:var(--txt);border:1.5px solid var(--bd);}
+.mag-btn-pink{background:linear-gradient(135deg,#ec4899,#f97316);color:#fff;border:none;}
+.mag-btn::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,.12);transform:translateY(101%);transition:transform .25s cubic-bezier(.33,1,.68,1);}
+.mag-btn:hover::before{transform:translateY(0);}
+.mag-btn-ghost:hover{border-color:var(--txt);}
+.btn-dot{width:8px;height:8px;border-radius:50%;background:var(--acc2);flex-shrink:0;animation:pulse 2s ease infinite;}
+.mag-btn-primary .btn-dot,.mag-btn-pink .btn-dot{background:rgba(255,255,255,.7);animation:none;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(87,242,135,.4);}50%{box-shadow:0 0 0 8px rgba(87,242,135,0);}}
+
+.scroll-hint{position:absolute;bottom:40px;left:80px;display:flex;align-items:center;gap:12px;font-family:var(--font-mono);font-size:11px;color:var(--dim);letter-spacing:.1em;}
+.scroll-line{width:40px;height:1px;background:var(--dim);animation:scrollLine 2s ease infinite;}
+@keyframes scrollLine{0%{transform:scaleX(0);transform-origin:left;}50%{transform:scaleX(1);transform-origin:left;}51%{transform:scaleX(1);transform-origin:right;}100%{transform:scaleX(0);transform-origin:right;}}
+
+section{padding:120px 80px;position:relative;}
+.sec-label{font-family:var(--font-mono);font-size:11px;color:var(--acc);letter-spacing:.15em;text-transform:uppercase;
+  display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.sec-label::after{content:'';flex:0 0 40px;height:1px;background:var(--acc);opacity:.5;}
+.sec-title{font-family:var(--font-display);font-size:clamp(40px,6vw,80px);line-height:.95;letter-spacing:-.01em;color:var(--txt);margin-bottom:60px;}
+
+#about{border-top:1px solid var(--bd);}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start;}
+.about-text{font-size:15px;color:var(--muted);line-height:1.75;}
+.about-text strong{color:var(--txt);}
+
+.tech-cloud{display:flex;flex-wrap:wrap;gap:10px;align-content:start;}
+.tech-badge{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:600;
+  border:1px solid;cursor:default;transition:transform .2s,box-shadow .2s;letter-spacing:.02em;animation:floatBadge 7s ease-in-out infinite;}
+.tech-badge:hover{transform:translateY(-3px);box-shadow:0 0 20px rgba(88,101,242,.25);}
+.tech-badge .ticon{font-size:15px;}
+.tb-purple{background:rgba(88,101,242,.12);border-color:rgba(88,101,242,.3);color:#a5b4fc;animation-delay:0s;}
+.tb-green{background:rgba(87,242,135,.08);border-color:rgba(87,242,135,.25);color:var(--acc2);animation-delay:.4s;}
+.tb-yellow{background:rgba(254,231,92,.07);border-color:rgba(254,231,92,.2);color:var(--acc3);animation-delay:.8s;}
+.tb-pink{background:rgba(255,126,179,.08);border-color:rgba(255,126,179,.25);color:var(--acc4);animation-delay:1.2s;}
+.tb-blue{background:rgba(96,165,250,.09);border-color:rgba(96,165,250,.25);color:#93c5fd;animation-delay:1.6s;}
+.tb-orange{background:rgba(251,146,60,.08);border-color:rgba(251,146,60,.25);color:#fdba74;animation-delay:2s;}
+.tb-teal{background:rgba(45,212,191,.08);border-color:rgba(45,212,191,.25);color:#5eead4;animation-delay:2.4s;}
+.tb-red{background:rgba(237,66,69,.08);border-color:rgba(237,66,69,.25);color:#fca5a5;animation-delay:2.8s;}
+
+#experience{border-top:1px solid var(--bd);background:var(--s1);}
+.exp-list{display:flex;flex-direction:column;gap:2px;}
+.exp-item{background:var(--s2);padding:28px 32px;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:start;
+  transition:background .15s;position:relative;overflow:hidden;cursor:none;}
+.exp-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--acc);transform:scaleY(0);transition:transform .25s cubic-bezier(.33,1,.68,1);}
+.exp-item:hover{background:var(--s3);}
+.exp-item:hover::before{transform:scaleY(1);}
+.exp-item.promoted::before{background:var(--acc2);}
+.exp-role{font-size:17px;font-weight:600;color:var(--txt);margin-bottom:4px;}
+.exp-company{font-size:14px;color:var(--acc);font-weight:500;margin-bottom:8px;}
+.exp-desc{font-size:13px;color:var(--muted);line-height:1.6;max-width:600px;}
+.exp-date{font-family:var(--font-mono);font-size:11px;color:var(--dim);white-space:nowrap;padding-top:4px;}
+.exp-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:3px 8px;border-radius:4px;margin-bottom:8px;}
+.badge-promo{background:rgba(87,242,135,.1);color:var(--acc2);border:1px solid rgba(87,242,135,.2);}
+.badge-research{background:rgba(88,101,242,.1);color:#8fa2ff;border:1px solid rgba(88,101,242,.2);}
+
+#projects{border-top:1px solid var(--bd);}
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:2px;}
+.proj-card{background:var(--s2);padding:28px;position:relative;overflow:hidden;cursor:none;transition:background .15s;}
+.proj-card:hover{background:var(--s3);}
+.proj-glow{position:absolute;width:200px;height:200px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(88,101,242,.15),transparent 70%);
+  transform:translate(-50%,-50%);opacity:0;transition:opacity .3s;}
+.proj-card:hover .proj-glow{opacity:1;}
+.proj-icon-wrap{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:12px;font-size:24px;margin-bottom:16px;}
+.picon-purple{background:rgba(88,101,242,.15);border:1px solid rgba(88,101,242,.3);}
+.picon-green{background:rgba(87,242,135,.1);border:1px solid rgba(87,242,135,.25);}
+.picon-blue{background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.25);}
+.picon-yellow{background:rgba(254,231,92,.08);border:1px solid rgba(254,231,92,.2);}
+.picon-red{background:rgba(237,66,69,.08);border:1px solid rgba(237,66,69,.2);}
+.picon-teal{background:rgba(45,212,191,.08);border:1px solid rgba(45,212,191,.2);}
+.proj-title{font-size:17px;font-weight:700;color:var(--txt);margin-bottom:6px;}
+.proj-desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px;}
+.proj-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+.proj-tag{font-family:var(--font-mono);font-size:10px;color:var(--dim);background:var(--s3);padding:3px 8px;border-radius:4px;border:1px solid var(--bd);}
+.proj-link{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--acc);text-decoration:none;letter-spacing:.03em;transition:gap .15s;}
+.proj-link:hover{gap:10px;}
+.proj-link svg{flex-shrink:0;}
+
+#skills{border-top:1px solid var(--bd);background:var(--s1);}
+.skills-outer{display:grid;grid-template-columns:1fr 1fr;gap:60px;}
+.skills-group{margin-bottom:40px;}
+.skills-group:last-child{margin-bottom:0;}
+.skills-group-label{font-family:var(--font-mono);font-size:11px;color:var(--dim);letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px;}
+.skill-bar-wrap{margin-bottom:12px;}
+.skill-bar-top{display:flex;justify-content:space-between;margin-bottom:5px;}
+.skill-name{font-size:13px;color:var(--txt);font-weight:500;}
+.skill-pct{font-family:var(--font-mono);font-size:11px;color:var(--dim);}
+.skill-bar{height:3px;background:var(--s3);border-radius:99px;overflow:hidden;}
+.skill-fill{height:100%;border-radius:99px;background:var(--acc);width:0%;transition:width 1.2s cubic-bezier(.33,1,.68,1);}
+.skill-fill.green{background:var(--acc2);}
+.skill-fill.yellow{background:var(--acc3);}
+.skill-fill.pink{background:var(--acc4);}
+.skill-fill.teal{background:#2dd4bf;}
+.skill-fill.orange{background:#fb923c);}
+
+#certs{border-top:1px solid var(--bd);}
+.certs-row{display:flex;gap:2px;flex-wrap:wrap;}
+.cert-card{flex:1;min-width:240px;background:var(--s2);padding:28px;position:relative;overflow:hidden;cursor:none;transition:background .15s;}
+.cert-card:hover{background:var(--s3);}
+.cert-icon-wrap{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px;}
+.cert-icon-wrap.aws{background:rgba(254,231,92,.08);border:1px solid rgba(254,231,92,.15);}
+.cert-icon-wrap.uni{background:rgba(88,101,242,.08);border:1px solid rgba(88,101,242,.15);}
+.cert-icon-wrap.sec{background:rgba(87,242,135,.08);border:1px solid rgba(87,242,135,.15);}
+.cert-name{font-size:15px;font-weight:700;color:var(--txt);margin-bottom:4px;}
+.cert-issuer{font-size:12px;color:var(--muted);margin-bottom:12px;}
+.cert-pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:4px;}
+.cert-pill.verified{background:rgba(35,165,90,.1);color:var(--acc2);border:1px solid rgba(35,165,90,.2);}
+.cert-pill.soon{background:rgba(254,231,92,.08);color:var(--acc3);border:1px solid rgba(254,231,92,.2);}
+
+#contact{border-top:1px solid var(--bd);background:var(--s1);}
+.contact-inner{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+.contact-big{font-family:var(--font-display);font-size:clamp(50px,7vw,100px);line-height:.95;color:var(--txt);margin-bottom:24px;}
+.contact-big span{color:var(--acc);}
+.contact-sub{font-size:16px;color:var(--muted);max-width:400px;line-height:1.7;margin-bottom:32px;}
+.contact-links{display:flex;flex-direction:column;gap:2px;}
+.contact-link{display:flex;align-items:center;justify-content:space-between;background:var(--s2);padding:18px 24px;text-decoration:none;transition:background .15s,padding-right .15s;cursor:none;}
+.contact-link:hover{background:var(--s3);padding-right:32px;}
+.contact-link-left{display:flex;align-items:center;gap:14px;}
+.contact-link-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.contact-link-label{font-size:14px;font-weight:600;color:var(--txt);}
+.contact-link-sub{font-size:12px;color:var(--muted);}
+.contact-link-arr{color:var(--dim);transition:color .15s;}
+.contact-link:hover .contact-link-arr{color:var(--acc);}
+
+.glow-btn{position:relative;display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--font-body);font-size:14px;font-weight:600;cursor:none;
+  padding:14px 28px;border-radius:8px;text-decoration:none;color:#fff;
+  background:linear-gradient(135deg,#5865f2,#7c3aed);border:none;overflow:hidden;letter-spacing:.02em;transition:transform .15s;}
+.glow-btn:hover{transform:translateY(-2px);opacity:.9;}
+
+footer{padding:28px 80px;border-top:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center;}
+.footer-text{font-family:var(--font-mono);font-size:11px;color:var(--dim);}
+.footer-socials{display:flex;gap:10px;}
+.footer-social{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;
+  border:1px solid var(--bd);background:var(--s2);text-decoration:none;cursor:none;transition:transform .2s,border-color .2s;}
+.footer-social:hover{transform:translateY(-2px);}
+.footer-social svg{width:18px;height:18px;fill:var(--dim);transition:fill .15s;}
+.footer-social.gh:hover svg{fill:#e6edf3;}
+.footer-social.li:hover svg{fill:#60a5fa;}
+.footer-social.ig:hover svg{fill:#f472b6;}
+.footer-social:hover{border-color:var(--muted);}
+
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.33,1,.68,1),transform .7s cubic-bezier(.33,1,.68,1);}
+.reveal.visible{opacity:1;transform:none;}
+
+.grid-bg{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
+.grid-bg::before{content:'';position:absolute;inset:0;
+  background-image:linear-gradient(rgba(48,54,61,.25) 1px,transparent 1px),linear-gradient(90deg,rgba(48,54,61,.25) 1px,transparent 1px);
+  background-size:60px 60px;}
+.grid-bg::after{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(88,101,242,.06),transparent);}
+
+@media(max-width:768px){
+  nav{padding:0 20px;}
+  .nav-links{display:none;}
+  section,#hero{padding:80px 24px;}
+  .about-grid,.contact-inner,.skills-outer{grid-template-columns:1fr;gap:40px;}
+  footer{padding:20px 24px;flex-direction:column;gap:12px;text-align:center;}
+  .scroll-hint{left:24px;}
+  .float-badge{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"><div id="cursor-dot"></div><div id="cursor-ring"></div></div>
+<div id="noise"></div>
+<canvas id="bg-canvas"></canvas>
+
+<nav>
+  <div class="nav-logo">RT<span>.</span></div>
+  <div class="nav-links">
+    <a class="nav-link" href="#about">About</a>
+    <a class="nav-link" href="#experience">Experience</a>
+    <a class="nav-link" href="#projects">Projects</a>
+    <a class="nav-link" href="#skills">Skills</a>
+    <a class="nav-link" href="#certs">Certs</a>
+  </div>
+  <a class="nav-cta" href="https://linkedin.com/in/roshan-tamangg" target="_blank">✨ Hire me →</a>
+</nav>
+
+<div class="page">
+
+<section id="hero">
+  <div class="grid-bg"></div>
+  <div class="float-badge b1">🛡️ Fortinet Stack</div>
+  <div class="float-badge b2">☁️ AWS CCP</div>
+  <div class="float-badge b3">🎓 3.92 GPA</div>
+  <div class="float-badge b4">⚡ Power Automate</div>
+
+  <div class="hero-inner" style="position:relative;z-index:1;">
+    <div class="hero-eyebrow">Available for Sys/Net Admin roles</div>
+    <h1 class="hero-name">
+      <span class="scramble" data-text="ROSHAN">ROSHAN</span><br>
+      <span class="scramble acc" data-text="TAMANG">TAMANG</span>
+    </h1>
+    <p class="hero-sub">IT Engineer — <strong>Microsoft 365</strong>, <strong>Azure</strong>, <strong>Fortinet</strong> &amp; <strong>AWS</strong>. I build automations, audit security postures, and migrate infrastructure.</p>
+    <div class="hero-location">📍 <span>Cincinnati, Ohio</span></div>
+    <div class="hero-actions">
+      <a class="mag-btn mag-btn-primary" href="#projects"><div class="btn-dot"></div>View my work</a>
+      <a class="mag-btn mag-btn-pink" href="#contact"><div class="btn-dot"></div>Get in touch</a>
+      <a class="mag-btn mag-btn-ghost" href="https://github.com/Rosu69" target="_blank">🐙 GitHub ↗</a>
+    </div>
+    <div class="social-row">
+      <!-- GitHub -->
+      <a class="social-btn gh" href="https://github.com/Rosu69" target="_blank" title="GitHub">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      </a>
+      <!-- LinkedIn -->
+      <a class="social-btn li" href="https://linkedin.com/in/roshan-tamangg" target="_blank" title="LinkedIn">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      <!-- Instagram -->
+      <a class="social-btn ig" href="https://www.instagram.com/roshan_tamangxx" target="_blank" title="Instagram">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+      </a>
+    </div>
+  </div>
+  <div class="scroll-hint"><div class="scroll-line"></div>scroll</div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="sec-label">01 / About</div>
+  <div class="sec-title">Building things<br>that actually work.</div>
+  <div class="about-grid">
+    <div class="about-text reveal">
+      <p>Summa cum laude grad from NKU — B.S. in CIT, minor in CS, <strong>3.92 GPA</strong>, full $77K scholarship. Currently at <strong>Ohio Valley Goodwill Industries</strong> owning M365 admin, the Fortinet stack, and HR automations. Promoted within a year. Previously: cloud research at NKU, IT co-op at Cincinnati Sports Club.</p>
+      <p>I write PowerShell that catches security gaps before they become incidents. I automate the stuff nobody wants to do manually. I migrate things so people stop emailing 50MB attachments.</p>
+    </div>
+    <div class="tech-cloud reveal" style="transition-delay:.15s">
+      <div class="tech-badge tb-purple"><span class="ticon">🔷</span>Microsoft 365</div>
+      <div class="tech-badge tb-blue"><span class="ticon">☁️</span>Azure / Entra ID</div>
+      <div class="tech-badge tb-yellow"><span class="ticon">🟡</span>AWS</div>
+      <div class="tech-badge tb-orange"><span class="ticon">🔶</span>FortiGate</div>
+      <div class="tech-badge tb-orange"><span class="ticon">🔒</span>FortiEDR</div>
+      <div class="tech-badge tb-orange"><span class="ticon">🔌</span>FortiSwitch</div>
+      <div class="tech-badge tb-orange"><span class="ticon">🌐</span>FortiVPN</div>
+      <div class="tech-badge tb-green"><span class="ticon">💚</span>PowerShell</div>
+      <div class="tech-badge tb-pink"><span class="ticon">⚡</span>Power Automate</div>
+      <div class="tech-badge tb-teal"><span class="ticon">📊</span>SharePoint</div>
+      <div class="tech-badge tb-blue"><span class="ticon">📧</span>Exchange Online</div>
+      <div class="tech-badge tb-purple"><span class="ticon">🪟</span>Windows / AD</div>
+      <div class="tech-badge tb-teal"><span class="ticon">🎥</span>Verkada</div>
+      <div class="tech-badge tb-red"><span class="ticon">🛡️</span>Cynet XDR</div>
+      <div class="tech-badge tb-blue"><span class="ticon">📦</span>Acronis</div>
+      <div class="tech-badge tb-green"><span class="ticon">📡</span>AltaFiber UC</div>
+      <div class="tech-badge tb-yellow"><span class="ticon">🖥️</span>NinjaOne RMM</div>
+      <div class="tech-badge tb-pink"><span class="ticon">🐳</span>Docker</div>
+      <div class="tech-badge tb-teal"><span class="ticon">🌩️</span>OpenStack</div>
+      <div class="tech-badge tb-purple"><span class="ticon">🔑</span>Graph API</div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="sec-label">02 / Experience</div>
+  <div class="sec-title">Where I've<br>shipped work.</div>
+  <div class="exp-list">
+    <div class="exp-item promoted reveal">
+      <div>
+        <div class="exp-badge badge-promo">▲ Promoted</div>
+        <div class="exp-role">IT Support Technician</div>
+        <div class="exp-company">Ohio Valley Goodwill Industries</div>
+        <div class="exp-desc">Full M365 admin — Exchange, SharePoint, Teams, Entra ID. PowerShell + Graph API Conditional Access auditor. Power Automate HR workflows. On-prem → SharePoint migration. Fortinet stack: FortiGate, FortiSwitch, FortiEDR, VPN. Operates Verkada, Cynet XDR, Acronis, AltaFiber UC portal.</div>
+      </div>
+      <div class="exp-date">Mar 2026 – Present</div>
+    </div>
+    <div class="exp-item reveal" style="transition-delay:.05s">
+      <div>
+        <div class="exp-role">IT Help Desk I</div>
+        <div class="exp-company">Ohio Valley Goodwill Industries</div>
+        <div class="exp-desc">AD, Azure, M365 admin. Hardware/software support, workstation imaging, Fortinet endpoint protection, NinjaOne RMM, TeamViewer. Windows and Mac environments.</div>
+      </div>
+      <div class="exp-date">Mar 2025 – Mar 2026</div>
+    </div>
+    <div class="exp-item reveal" style="transition-delay:.1s">
+      <div>
+        <div class="exp-badge badge-research">Research</div>
+        <div class="exp-role">Research Assistant</div>
+        <div class="exp-company">NKU College of Informatics</div>
+        <div class="exp-desc">OpenStack + Apache Guacamole remote desktop gateway. AWS edge computing research — WAF, ALB, EC2, CloudWatch, Kinesis Firehose, S3.</div>
+      </div>
+      <div class="exp-date">Aug 2024 – May 2025</div>
+    </div>
+    <div class="exp-item reveal" style="transition-delay:.15s">
+      <div>
+        <div class="exp-role">IT Help Desk Co-op</div>
+        <div class="exp-company">Cincinnati Sports Club</div>
+        <div class="exp-desc">Full-time co-op. On-site tech support and infrastructure maintenance at a large sports facility.</div>
+      </div>
+      <div class="exp-date">Aug – Dec 2024</div>
+    </div>
+    <div class="exp-item reveal" style="transition-delay:.2s">
+      <div>
+        <div class="exp-badge badge-research">Teaching</div>
+        <div class="exp-role">Teaching Assistant &amp; Lab Grader</div>
+        <div class="exp-company">NKU College of Informatics</div>
+        <div class="exp-desc">TA for Dr. Anthony Tsetse, 2 years. Graded labs for ~85 students, guest-lectured. Informatics Ambassador 2024–2025.</div>
+      </div>
+      <div class="exp-date">Jan 2023 – Jul 2024</div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="sec-label">03 / Projects</div>
+  <div class="sec-title">Things I've<br>actually built.</div>
+  <div class="projects-grid">
+    <div class="proj-card reveal">
+      <div class="proj-glow"></div>
+      <div class="proj-icon-wrap picon-purple">🔐</div>
+      <div class="proj-title">Entra CA Auditor</div>
+      <div class="proj-desc">PowerShell + Graph API script that audits every Conditional Access policy against Microsoft best practices. Catches report-only leaks, missing MFA, legacy auth gaps. Outputs HTML report + CSV. Read-only — safe in prod.</div>
+      <div class="proj-tags"><span class="proj-tag">PowerShell</span><span class="proj-tag">Graph API</span><span class="proj-tag">Entra ID</span><span class="proj-tag">Zero Trust</span></div>
+      <a class="proj-link" href="https://github.com/Rosu69/Entra-CA-Auditor" target="_blank">View on GitHub <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></a>
+    </div>
+    <div class="proj-card reveal" style="transition-delay:.05s">
+      <div class="proj-glow"></div>
+      <div class="proj-icon-wrap picon-green">⚡</div>
+      <div class="proj-title">Automated HR Workflow</div>
+      <div class="proj-desc">Microsoft Forms + Power Automate with branching logic. Handles terminations, promotions, wage changes, transfers. Auto-routes to HR and/or IT, fires email + Teams notifications.</div>
+      <div class="proj-tags"><span class="proj-tag">Power Automate</span><span class="proj-tag">M365</span><span class="proj-tag">Teams</span><span class="proj-tag">Low-Code</span></div>
+    </div>
+    <div class="proj-card reveal" style="transition-delay:.1s">
+      <div class="proj-glow"></div>
+      <div class="proj-icon-wrap picon-yellow">☁️</div>
+      <div class="proj-title">Secure AWS Web Architecture</div>
+      <div class="proj-desc">Multi-tier AWS app: IGW → WAF (geo/IP blocking) → ALB → EC2. WAF logs via Kinesis Firehose → S3. CloudWatch alarms. High availability by design.</div>
+      <div class="proj-tags"><span class="proj-tag">AWS</span><span class="proj-tag">WAF</span><span class="proj-tag">ALB</span><span class="proj-tag">CloudWatch</span><span class="proj-tag">VPC</span></div>
+    </div>
+    <div class="proj-card reveal" style="transition-delay:.15s">
+      <div class="proj-glow"></div>
+      <div class="proj-icon-wrap picon-blue">🖧</div>
+      <div class="proj-title">Active Directory HA Lab</div>
+      <div class="proj-desc">Two WS 2022 domain controllers with full AD replication and failover. Ubuntu joined to domain for cross-platform auth. DHCP failover for continuity.</div>
+      <div class="proj-tags"><span class="proj-tag">Active Directory</span><span class="proj-tag">WS 2022</span><span class="proj-tag">Linux</span><span class="proj-tag">DHCP</span></div>
+    </div>
+    <div class="proj-card reveal" style="transition-delay:.2s">
+      <div class="proj-glow"></div>
+      <div class="proj-icon-wrap picon-red">🛡️</div>
+      <div class="proj-title">pfSense Firewall + Docker DMZ</div>
+      <div class="proj-desc">pfSense rules securing a DMZ — controlled external access to Apache in Docker while blocking unauthorized traffic. Port redirection tested for internal and external paths.</div>
+      <div class="proj-tags"><span class="proj-tag">pfSense</span><span class="proj-tag">Docker</span><span class="proj-tag">Apache</span><span class="proj-tag">Networking</span></div>
+    </div>
+    <div class="proj-card reveal" style="transition-delay:.25s">
+      <div class="proj-glow"></div>
+      <div class="proj-icon-wrap picon-teal">🌐</div>
+      <div class="proj-title">OpenStack + Guacamole Gateway</div>
+      <div class="proj-desc">Scalable cloud infra on OpenStack with Apache Guacamole as remote desktop gateway. Container orchestration, load balancing, auto-scaling for NKU College of Informatics.</div>
+      <div class="proj-tags"><span class="proj-tag">OpenStack</span><span class="proj-tag">Guacamole</span><span class="proj-tag">Containers</span><span class="proj-tag">Research</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="sec-label">04 / Skills</div>
+  <div class="sec-title">What I work<br>with daily.</div>
+  <div class="skills-outer">
+    <div>
+      <div class="skills-group reveal">
+        <div class="skills-group-label">Microsoft 365 &amp; Azure</div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">Exchange Online</span><span class="skill-pct">95%</span></div><div class="skill-bar"><div class="skill-fill" data-pct="95"></div></div></div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">Entra ID / Azure AD</span><span class="skill-pct">92%</span></div><div class="skill-bar"><div class="skill-fill" data-pct="92"></div></div></div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">SharePoint Online</span><span class="skill-pct">88%</span></div><div class="skill-bar"><div class="skill-fill" data-pct="88"></div></div></div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">Power Automate</span><span class="skill-pct">85%</span></div><div class="skill-bar"><div class="skill-fill" data-pct="85"></div></div></div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">Microsoft Teams</span><span class="skill-pct">90%</span></div><div class="skill-bar"><div class="skill-fill" data-pct="90"></div></div></div>
+      </div>
+      <div class="skills-group reveal" style="transition-delay:.1s">
+        <div class="skills-group-label">Scripting &amp; Dev</div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">PowerShell</span><span class="skill-pct">88%</span></div><div class="skill-bar"><div class="skill-fill green" data-pct="88"></div></div></div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">Python</span><span class="skill-pct">72%</span></div><div class="skill-bar"><div class="skill-fill green" data-pct="72"></div></div></div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">Java</span><span class="skill-pct">68%</span></div><div class="skill-bar"><div class="skill-fill green" data-pct="68"></div></div></div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">Graph API</span><span class="skill-pct">80%</span></div><div class="skill-bar"><div class="skill-fill green" data-pct="80"></div></div></div>
+      </div>
+      <div class="skills-group reveal" style="transition-delay:.15s">
+        <div class="skills-group-label">Security &amp; Monitoring</div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">Cynet XDR</span><span class="skill-pct">80%</span></div><div class="skill-bar"><div class="skill-fill pink" data-pct="80"></div></div></div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">Conditional Access / Zero Trust</span><span class="skill-pct">90%</span></div><div class="skill-bar"><div class="skill-fill pink" data-pct="90"></div></div></div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">Acronis Email Filtering</span><span class="skill-pct">78%</span></div><div class="skill-bar"><div class="skill-fill pink" data-pct="78"></div></div></div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">Verkada Camera Systems</span><span class="skill-pct">82%</span></div><div class="skill-bar"><div class="skill-fill pink" data-pct="82"></div></div></div>
+      </div>
+    </div>
+    <div>
+      <div class="skills-group reveal" style="transition-delay:.05s">
+        <div class="skills-group-label">Fortinet Stack</div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">FortiGate</span><span class="skill-pct">85%</span></div><div class="skill-bar"><div class="skill-fill yellow" data-pct="85"></div></div></div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">FortiSwitch</span><span class="skill-pct">80%</span></div><div class="skill-bar"><div class="skill-fill yellow" data-pct="80"></div></div></div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">FortiEDR</span><span class="skill-pct">78%</span></div><div class="skill-bar"><div class="skill-fill yellow" data-pct="78"></div></div></div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">FortiVPN / FortiClient</span><span class="skill-pct">80%</span></div><div class="skill-bar"><div class="skill-fill yellow" data-pct="80"></div></div></div>
+      </div>
+      <div class="skills-group reveal" style="transition-delay:.08s">
+        <div class="skills-group-label">Networking &amp; Infrastructure</div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">Active Directory</span><span class="skill-pct">88%</span></div><div class="skill-bar"><div class="skill-fill teal" data-pct="88"></div></div></div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">pfSense / Firewall</span><span class="skill-pct">75%</span></div><div class="skill-bar"><div class="skill-fill teal" data-pct="75"></div></div></div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">AltaFiber Hosted UC</span><span class="skill-pct">76%</span></div><div class="skill-bar"><div class="skill-fill teal" data-pct="76"></div></div></div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">NinjaOne RMM</span><span class="skill-pct">85%</span></div><div class="skill-bar"><div class="skill-fill teal" data-pct="85"></div></div></div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">Windows / macOS</span><span class="skill-pct">90%</span></div><div class="skill-bar"><div class="skill-fill teal" data-pct="90"></div></div></div>
+      </div>
+      <div class="skills-group reveal" style="transition-delay:.12s">
+        <div class="skills-group-label">Cloud &amp; Infra</div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">AWS (CCP)</span><span class="skill-pct">78%</span></div><div class="skill-bar"><div class="skill-fill" data-pct="78"></div></div></div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">OpenStack</span><span class="skill-pct">70%</span></div><div class="skill-bar"><div class="skill-fill" data-pct="70"></div></div></div>
+        <div class="skill-bar-wrap"><div class="skill-bar-top"><span class="skill-name">Docker</span><span class="skill-pct">72%</span></div><div class="skill-bar"><div class="skill-fill" data-pct="72"></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CERTS -->
+<section id="certs">
+  <div class="sec-label">05 / Certifications</div>
+  <div class="sec-title">Credentials<br>&amp; education.</div>
+  <div class="certs-row">
+    <div class="cert-card reveal">
+      <div class="cert-icon-wrap aws">☁️</div>
+      <div class="cert-name">AWS Certified Cloud Practitioner</div>
+      <div class="cert-issuer">Amazon Web Services · Expires Aug 2027</div>
+      <div class="cert-pill verified">✓ Verified</div>
+    </div>
+    <div class="cert-card reveal" style="transition-delay:.05s">
+      <div class="cert-icon-wrap uni">🎓</div>
+      <div class="cert-name">B.S. Computer Information Technology</div>
+      <div class="cert-issuer">Northern Kentucky University · GPA 3.92 · May 2025</div>
+      <div class="cert-pill verified">✓ Summa Cum Laude</div>
+    </div>
+    <div class="cert-card reveal" style="transition-delay:.1s">
+      <div class="cert-icon-wrap uni">💻</div>
+      <div class="cert-name">Minor in Computer Science</div>
+      <div class="cert-issuer">Northern Kentucky University · GPA 3.93</div>
+      <div class="cert-pill verified">✓ Verified</div>
+    </div>
+    <div class="cert-card reveal" style="transition-delay:.15s">
+      <div class="cert-icon-wrap sec">🏆</div>
+      <div class="cert-name">Dean's List — All Semesters</div>
+      <div class="cert-issuer">Northern Kentucky University · 2021–2025</div>
+      <div class="cert-pill verified">✓ Every semester</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="sec-label">06 / Contact</div>
+  <div class="contact-inner">
+    <div class="reveal">
+      <div class="contact-big">Let's<br><span>work</span><br>together.</div>
+      <div class="contact-sub">Open to sys admin, net admin, and cloud-focused IT roles in the Cincinnati area. Hit me up on LinkedIn or check my GitHub.</div>
+      <a class="glow-btn" href="https://linkedin.com/in/roshan-tamangg" target="_blank">✨ Connect on LinkedIn →</a>
+    </div>
+    <div class="contact-links reveal" style="transition-delay:.1s">
+      <a class="contact-link" href="https://linkedin.com/in/roshan-tamangg" target="_blank">
+        <div class="contact-link-left">
+          <div class="contact-link-icon" style="background:rgba(10,102,194,.15);font-size:18px;">💼</div>
+          <div><div class="contact-link-label">LinkedIn</div><div class="contact-link-sub">/in/roshan-tamangg</div></div>
+        </div>
+        <div class="contact-link-arr">→</div>
+      </a>
+      <a class="contact-link" href="https://github.com/Rosu69" target="_blank">
+        <div class="contact-link-left">
+          <div class="contact-link-icon" style="background:rgba(255,255,255,.06);font-size:18px;">🐙</div>
+          <div><div class="contact-link-label">GitHub</div><div class="contact-link-sub">/Rosu69</div></div>
+        </div>
+        <div class="contact-link-arr">→</div>
+      </a>
+      <a class="contact-link" href="https://www.instagram.com/roshan_tamangxx" target="_blank">
+        <div class="contact-link-left">
+          <div class="contact-link-icon" style="background:rgba(228,64,95,.1);font-size:18px;">📸</div>
+          <div><div class="contact-link-label">Instagram</div><div class="contact-link-sub">@roshan_tamangxx</div></div>
+        </div>
+        <div class="contact-link-arr">→</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-text">© 2026 Roshan Tamang · Cincinnati, OH 🦦</div>
+  <div class="footer-socials">
+    <a class="footer-social gh" href="https://github.com/Rosu69" target="_blank" title="GitHub">
+      <svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+    </a>
+    <a class="footer-social li" href="https://linkedin.com/in/roshan-tamangg" target="_blank" title="LinkedIn">
+      <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+    </a>
+    <a class="footer-social ig" href="https://www.instagram.com/roshan_tamangxx" target="_blank" title="Instagram">
+      <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+    </a>
+  </div>
+</footer>
+</div>
+
+<script>
+/* CURSOR */
+const dot=document.getElementById('cursor-dot'),ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx+'px';dot.style.top=my+'px';});
+(function animRing(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);})();
+document.querySelectorAll('a,button,[class*="card"],[class*="item"],[class*="btn"],[class*="badge"],[class*="social"]').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('hovering'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('hovering'));
+});
+
+/* SEA OTTER CANVAS */
+const canvas=document.getElementById('bg-canvas');
+const ctx=canvas.getContext('2d');
+let W,H;
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+
+/* gentle floating bubbles + tiny otters */
+const bubbles=[];
+for(let i=0;i<40;i++){
+  bubbles.push({
+    x:Math.random()*1600,y:Math.random()*900,
+    r:Math.random()*3+1,
+    vx:(Math.random()-.5)*.2,
+    vy:-(Math.random()*.3+.1),
+    alpha:Math.random()*.15+.03,
+    wobble:Math.random()*Math.PI*2
+  });
+}
+
+const otters=[];
+for(let i=0;i<6;i++){
+  otters.push({
+    x:Math.random()*1600-100,
+    y:Math.random()*900,
+    vx:(Math.random()*.4+.15)*(Math.random()<.5?1:-1),
+    vy:(Math.random()-.5)*.1,
+    size:Math.random()*12+14,
+    phase:Math.random()*Math.PI*2,
+    speed:Math.random()*.02+.015,
+    rot:0
+  });
+}
+
+function drawOtter(cx,cy,s,rot){
+  ctx.save();
+  ctx.translate(cx,cy);
+  ctx.rotate(rot);
+  ctx.globalAlpha=.18;
+  // body
+  ctx.fillStyle='#8b6c52';
+  ctx.beginPath();ctx.ellipse(0,0,s,s*.65,0,0,Math.PI*2);ctx.fill();
+  // head
+  ctx.beginPath();ctx.ellipse(s*.6,0,s*.45,s*.4,0,0,Math.PI*2);ctx.fill();
+  // paws up (floating on back)
+  ctx.fillStyle='#a07850';
+  ctx.beginPath();ctx.ellipse(-s*.2,-s*.55,s*.18,s*.12,-.3,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(s*.1,-s*.55,s*.18,s*.12,.3,0,Math.PI*2);ctx.fill();
+  // belly patch
+  ctx.fillStyle='#c8a882';
+  ctx.beginPath();ctx.ellipse(0,0,s*.55,s*.38,0,0,Math.PI*2);ctx.fill();
+  // face
+  ctx.fillStyle='#c8a882';
+  ctx.beginPath();ctx.ellipse(s*.6,0,s*.35,s*.3,0,0,Math.PI*2);ctx.fill();
+  // eyes
+  ctx.fillStyle='#1a1a1a';
+  ctx.beginPath();ctx.arc(s*.72,-s*.08,s*.05,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(s*.52,-s*.08,s*.05,0,Math.PI*2);ctx.fill();
+  // nose
+  ctx.fillStyle='#3a2010';
+  ctx.beginPath();ctx.ellipse(s*.82,s*.04,s*.07,s*.05,0,0,Math.PI*2);ctx.fill();
+  // tail
+  ctx.fillStyle='#7a5c42';
+  ctx.beginPath();ctx.ellipse(-s*.9,s*.1,s*.35,s*.18,.2,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+}
+
+let t=0;
+(function animate(){
+  ctx.clearRect(0,0,W,H);
+  t+=.016;
+
+  // ripple lines (water surface feel)
+  for(let i=0;i<5;i++){
+    const y=H*(.2+i*.15)+Math.sin(t*.4+i)*8;
+    ctx.beginPath();
+    ctx.moveTo(0,y);
+    for(let x=0;x<=W;x+=40){ctx.lineTo(x,y+Math.sin(x*.015+t*.5+i)*4);}
+    ctx.strokeStyle=`rgba(88,101,242,${.025-i*.003})`;
+    ctx.lineWidth=1.5;
+    ctx.stroke();
+  }
+
+  // bubbles
+  bubbles.forEach(b=>{
+    b.x+=b.vx;b.y+=b.vy;b.wobble+=.04;
+    b.x+=Math.sin(b.wobble)*.3;
+    if(b.y<-10){b.y=H+10;b.x=Math.random()*W;}
+    if(b.x<-20)b.x=W+20;if(b.x>W+20)b.x=-20;
+    ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+    ctx.strokeStyle=`rgba(93,162,255,${b.alpha})`;
+    ctx.lineWidth=.8;ctx.stroke();
+    // tiny sparkle inside
+    ctx.beginPath();ctx.arc(b.x-b.r*.3,b.y-b.r*.3,b.r*.2,0,Math.PI*2);
+    ctx.fillStyle=`rgba(180,210,255,${b.alpha*.8})`;ctx.fill();
+  });
+
+  // otters
+  otters.forEach(o=>{
+    o.phase+=o.speed;
+    o.x+=o.vx;
+    o.y+=Math.sin(o.phase)*0.4+o.vy;
+    o.rot=Math.sin(o.phase*.7)*.08;
+    if(o.x>W+120){o.x=-120;o.y=Math.random()*H;}
+    if(o.x<-120){o.x=W+120;o.y=Math.random()*H;}
+    if(o.y<-60)o.y=H+60;if(o.y>H+60)o.y=-60;
+    drawOtter(o.x,o.y,o.size,o.rot+(o.vx<0?Math.PI:0));
+  });
+
+  requestAnimationFrame(animate);
+})();
+
+/* SCROLL REVEAL */
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:.15});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+/* SKILL BARS */
+const barObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('.skill-fill').forEach(f=>f.style.width=f.dataset.pct+'%');barObs.unobserve(e.target);}});
+},{threshold:.3});
+document.querySelectorAll('.skills-group').forEach(g=>barObs.observe(g));
+
+/* MAGNETIC BUTTONS */
+document.querySelectorAll('.mag-btn,.glow-btn').forEach(btn=>{
+  btn.addEventListener('mousemove',e=>{
+    const r=btn.getBoundingClientRect();
+    btn.style.transform=`translate(${(e.clientX-r.left-r.width/2)*.25}px,${(e.clientY-r.top-r.height/2)*.25}px)`;
+  });
+  btn.addEventListener('mouseleave',()=>{btn.style.transform='';});
+});
+
+/* PROJECT GLOW */
+document.querySelectorAll('.proj-card').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    const g=card.querySelector('.proj-glow');
+    g.style.left=(e.clientX-r.left)+'px';g.style.top=(e.clientY-r.top)+'px';
+  });
+});
+
+/* TEXT SCRAMBLE */
+class Scramble{
+  constructor(el){this.el=el;this.chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%';this.original=el.dataset.text;this.run();}
+  run(){let i=0;const iv=setInterval(()=>{this.el.textContent=this.original.split('').map((c,n)=>n<Math.floor(i)?c:this.chars[Math.floor(Math.random()*this.chars.length)]).join('');i+=.5;if(i>=this.original.length+1)clearInterval(iv);},40);}
+}
+window.addEventListener('load',()=>document.querySelectorAll('.scramble').forEach(el=>new Scramble(el)));
+
+/* ACTIVE NAV */
+const sObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){
+    document.querySelectorAll('.nav-link').forEach(l=>l.style.color='');
+    const a=document.querySelector(`.nav-link[href="#${e.target.id}"]`);
+    if(a)a.style.color='#e6edf3';
+  }});
+},{threshold:.4});
+document.querySelectorAll('section[id]').forEach(s=>sObs.observe(s));
+</script>
+</body>
+</html>
